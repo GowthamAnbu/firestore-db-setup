@@ -1,6 +1,9 @@
 import * as admin from 'firebase-admin';
 const serviceAccount = require('../service-account.json');
+import * as fs from 'fs-extra';
 
+const filePathToJson = '/home/local/TAG/gowthama/Desktop/playground/Firebase/functions/test.json';
+const obj = fs.readJSONSync(filePathToJson);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
@@ -8,26 +11,12 @@ admin.initializeApp({
 
 
 (async ( ) => {
-  // await chat( 'pizzachat' , 'Fear', "what the heck is that?!");
-  // await chat( 'pizzachat' , 'joy', "who puts broccoli on pizza?!");
-  // await getAllcollections();
-  // await admin.firestore().collection('test').doc().set(obj)
-  const testDocs = await admin.firestore().collection('rooms').listDocuments();
-  for (const doc of testDocs) {
-    // primary docs
-    const primaryDoc = await admin.firestore().collection('rooms').doc(`${doc.id}`).get();
-    if(primaryDoc.exists) {
-      console.log(doc.id, primaryDoc.data());
-    } else {
-      console.log(doc.id, 'document doesn\'t exists or document is a subcollection')
-    }
-    // subcollections
-    const subCollections = await admin.firestore().collection('rooms').doc(`${doc.id}`).listCollections();
-    for (const subCollection of subCollections) {
-      const subCollectionData = await admin.firestore().collection('rooms').doc(`${doc.id}`).collection(`${subCollection.id}`).get();
-      subCollectionData.docs.forEach(subCollectionDoc => console.log(subCollectionDoc.data()))
-    }
-  }
+  await setup();
   process.exit(0);
 })()
 . catch (err => { console.error(err) })
+
+export async function setup() {
+  console.log(obj);
+  await admin.firestore().collection('test1').doc('pizzachat').collection('messages').add(obj);
+}
